@@ -16,7 +16,7 @@ datasource:
     password: Sunkam@24809
     driver-class-name: com.ibm.db2.jcc.DB2Driver
     minimum-idle: 2
-    maximum-pool-size: 10
+    maximum-pool-size: 20
     connection-timeout: 3600000
 
   # SQL Server - nowprd database (SVR19 - 10.0.0.221)
@@ -27,7 +27,7 @@ datasource:
     password: Ind@taichen2024
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
     minimum-idle: 2
-    maximum-pool-size: 10
+    maximum-pool-size: 20
     connection-timeout: 3600000
 
   # MySQL - db_qc database (10.0.0.10)
@@ -38,7 +38,7 @@ datasource:
     password: 4dm1n
     driver-class-name: com.mysql.cj.jdbc.Driver
     minimum-idle: 2
-    maximum-pool-size: 10
+    maximum-pool-size: 20
     connection-timeout: 3600000
 
   # SQL Server - db_dying database (SVR19 - 10.0.0.221)
@@ -49,7 +49,7 @@ datasource:
     password: Ind@taichen2024
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
     minimum-idle: 2
-    maximum-pool-size: 10
+    maximum-pool-size: 20
     connection-timeout: 3600000
 
   # SQL Server - db_finishing database (SVR19 - 10.0.0.221)
@@ -60,7 +60,7 @@ datasource:
     password: Ind@taichen2024
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
     minimum-idle: 2
-    maximum-pool-size: 10
+    maximum-pool-size: 20
     connection-timeout: 3600000
 
 logging:
