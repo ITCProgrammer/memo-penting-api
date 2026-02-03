@@ -1,0 +1,69 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: laporan-springboot
+
+# Database Configuration based on koneksi.php
+
+datasource:
+  # DB2 NOWPRD (Primary for ITX data) - conn1 in PHP
+  # Hostname: 10.0.0.21, Database: NOWPRD, Port: 25000
+  db2:
+    jdbc-url: jdbc:db2://10.0.0.21:25000/NOWPRD
+    username: db2admin
+    password: Sunkam@24809
+    driver-class-name: com.ibm.db2.jcc.DB2Driver
+    minimum-idle: 2
+    maximum-pool-size: 10
+    connection-timeout: 300000
+
+  # SQL Server - nowprd database (SVR19 - 10.0.0.221)
+  # This is con_nowprd in PHP
+  sqlserver-nowprd:
+    jdbc-url: jdbc:sqlserver://10.0.0.221:1433;databaseName=nowprd;encrypt=false;trustServerCertificate=true
+    username: sa
+    password: Ind@taichen2024
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    minimum-idle: 2
+    maximum-pool-size: 10
+    connection-timeout: 300000
+
+  # MySQL - db_qc database (10.0.0.10)
+  # This is con_db_qc in PHP - still using MySQL
+  sqlserver-qc:
+    jdbc-url: jdbc:mysql://10.0.0.10:3306/db_qc?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Jakarta
+    username: dit
+    password: 4dm1n
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    minimum-idle: 2
+    maximum-pool-size: 10
+    connection-timeout: 300000
+
+  # SQL Server - db_dying database (SVR19 - 10.0.0.221)
+  # This is con_db_dyeing in PHP
+  sqlserver-dyeing:
+    jdbc-url: jdbc:sqlserver://10.0.0.221:1433;databaseName=db_dying;encrypt=false;trustServerCertificate=true
+    username: sa
+    password: Ind@taichen2024
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    minimum-idle: 2
+    maximum-pool-size: 10
+    connection-timeout: 300000
+
+  # SQL Server - db_finishing database (SVR19 - 10.0.0.221)
+  # This is con_finishing / con_db_finishing in PHP
+  sqlserver-finishing:
+    jdbc-url: jdbc:sqlserver://10.0.0.221:1433;databaseName=db_finishing;encrypt=false;trustServerCertificate=true
+    username: sa
+    password: Ind@taichen2024
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    minimum-idle: 2
+    maximum-pool-size: 10
+    connection-timeout: 300000
+
+logging:
+  level:
+    com.indotaichen: DEBUG
+    org.springframework.jdbc: DEBUG

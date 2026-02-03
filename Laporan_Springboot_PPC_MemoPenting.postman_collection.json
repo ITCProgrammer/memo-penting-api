@@ -1,0 +1,420 @@
+{
+	"info": {
+		"_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+		"name": "Laporan Springboot - PPC Memo Penting",
+		"description": "Collection for PPC Memo Penting API - Spring Boot migration from PHP native ppc_filter.php",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Health Check",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/ppc/health",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"ppc",
+						"health"
+					]
+				},
+				"description": "Check if the API is running"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Memo Penting - By Production Demand",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/ppc/memo-penting?prodDemand=00323602",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"ppc",
+						"memo-penting"
+					],
+					"query": [
+						{
+							"key": "prodDemand",
+							"value": "00323602",
+							"description": "Production Demand Code"
+						}
+					]
+				},
+				"description": "Get Memo Penting data filtered by Production Demand"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Memo Penting - By Bon Order (No Order)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/ppc/memo-penting?noOrder=SME2400489",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"ppc",
+						"memo-penting"
+					],
+					"query": [
+						{
+							"key": "noOrder",
+							"value": "SME2400489",
+							"description": "Bon Order / Sales Order Code"
+						}
+					]
+				},
+				"description": "Get Memo Penting data filtered by Bon Order (NO_ORDER)"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Memo Penting - By Production Order",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/ppc/memo-penting?prodOrder=00187475600",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"ppc",
+						"memo-penting"
+					],
+					"query": [
+						{
+							"key": "prodOrder",
+							"value": "00187475600",
+							"description": "Production Order Code (NO_KK)"
+						}
+					]
+				},
+				"description": "Get Memo Penting data filtered by Production Order (NO_KK)"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Memo Penting - By Date Range",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/ppc/memo-penting?tgl1=2025-01-01&tgl2=2025-01-31",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"ppc",
+						"memo-penting"
+					],
+					"query": [
+						{
+							"key": "tgl1",
+							"value": "2025-01-01",
+							"description": "From Date (Dari Tanggal)"
+						},
+						{
+							"key": "tgl2",
+							"value": "2025-01-31",
+							"description": "To Date (Sampai Tanggal)"
+						}
+					]
+				},
+				"description": "Get Memo Penting data filtered by Delivery date range"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Memo Penting - By PO Number",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/ppc/memo-penting?noPo=VUORI FA25 LATE ADD SMS",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"ppc",
+						"memo-penting"
+					],
+					"query": [
+						{
+							"key": "noPo",
+							"value": "VUORI FA25 LATE ADD SMS",
+							"description": "PO Number"
+						}
+					]
+				},
+				"description": "Get Memo Penting data filtered by PO Number"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Memo Penting - By Article Group and Code",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/ppc/memo-penting?articleGroup=CVCX&articleCode=DKI",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"ppc",
+						"memo-penting"
+					],
+					"query": [
+						{
+							"key": "articleGroup",
+							"value": "CVCX",
+							"description": "Article Group (SUBCODE02)"
+						},
+						{
+							"key": "articleCode",
+							"value": "DKI",
+							"description": "Article Code (SUBCODE03)"
+						}
+					]
+				},
+				"description": "Get Memo Penting data filtered by Article Group and Article Code"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Memo Penting - By Warna (Color)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/ppc/memo-penting?namaWarna=Espresso",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"ppc",
+						"memo-penting"
+					],
+					"query": [
+						{
+							"key": "namaWarna",
+							"value": "Espresso",
+							"description": "Color Name (partial match with LIKE)"
+						}
+					]
+				},
+				"description": "Get Memo Penting data filtered by Color Name (WARNA)"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Memo Penting - With KK Oke Filter (Sertakan)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/ppc/memo-penting?prodDemand=00323602&kkoke=sertakan",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"ppc",
+						"memo-penting"
+					],
+					"query": [
+						{
+							"key": "prodDemand",
+							"value": "00323602",
+							"description": "Production Demand Code"
+						},
+						{
+							"key": "kkoke",
+							"value": "sertakan",
+							"description": "KK Oke filter: ya, tidak, sertakan"
+						}
+					]
+				},
+				"description": "Get Memo Penting data with KK Oke filter set to 'sertakan' (include all)"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Memo Penting - Without KK Oke",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/ppc/memo-penting?prodDemand=00323602&kkoke=tidak",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"ppc",
+						"memo-penting"
+					],
+					"query": [
+						{
+							"key": "prodDemand",
+							"value": "00323602",
+							"description": "Production Demand Code"
+						},
+						{
+							"key": "kkoke",
+							"value": "tidak",
+							"description": "KK Oke filter: ya, tidak, sertakan (default: tidak)"
+						}
+					]
+				},
+				"description": "Get Memo Penting data excluding KK Oke (PROGRESSSTATUS != 6)"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Memo Penting - Multiple Filters",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/ppc/memo-penting?noOrder=SME2400489&tgl1=2025-01-01&tgl2=2025-01-31&kkoke=tidak",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"ppc",
+						"memo-penting"
+					],
+					"query": [
+						{
+							"key": "noOrder",
+							"value": "SME2400489",
+							"description": "Bon Order"
+						},
+						{
+							"key": "tgl1",
+							"value": "2025-01-01",
+							"description": "From Date"
+						},
+						{
+							"key": "tgl2",
+							"value": "2025-01-31",
+							"description": "To Date"
+						},
+						{
+							"key": "kkoke",
+							"value": "tidak",
+							"description": "KK Oke filter"
+						}
+					]
+				},
+				"description": "Get Memo Penting data with multiple filter combinations"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Memo Penting - POST Method",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"prodDemand\": \"00323602\",\n    \"kkoke\": \"tidak\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/ppc/memo-penting",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"ppc",
+						"memo-penting"
+					]
+				},
+				"description": "Get Memo Penting data using POST method with JSON body"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Memo Penting - POST All Filters",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"noOrder\": \"SME2400489\",\n    \"prodDemand\": \"00323602\",\n    \"prodOrder\": \"00187475600\",\n    \"tgl1\": \"2025-01-01\",\n    \"tgl2\": \"2025-01-31\",\n    \"noPo\": \"VUORI FA25 LATE ADD SMS\",\n    \"articleGroup\": \"\",\n    \"articleCode\": \"\",\n    \"namaWarna\": \"Espresso\",\n    \"kkoke\": \"tidak\",\n    \"orderline\": \"\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/ppc/memo-penting",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"ppc",
+						"memo-penting"
+					]
+				},
+				"description": "Get Memo Penting data using POST method with all available filters"
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		}
+	]
+}
