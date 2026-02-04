@@ -17,7 +17,7 @@ import java.util.*;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class PpcFilterService {
+public class PpcFilterSseService {
 
     private final PpcFilterRepository repository;
 
@@ -25,13 +25,49 @@ public class PpcFilterService {
     private static final DecimalFormat DF_2 = new DecimalFormat("#,##0.00");
     private static final DecimalFormat DF_3 = new DecimalFormat("#,##0.000");
 
-    public List<MemoPentingResponse> getFilteredData(PpcFilterRequest request) {
+    /**
+     * Functional interface for progress callback
+     */
+    @FunctionalInterface
+    public interface ProgressCallback {
+        void onProgress(String stage, int current, int total, String message, String detail);
+    }
+
+    /**
+     * Get filtered data with progress callback for SSE streaming
+     */
+    public List<MemoPentingResponse> getFilteredDataWithProgress(PpcFilterRequest request, ProgressCallback callback) {
         List<MemoPentingResponse> results = new ArrayList<>();
 
-        // Get main data from ITXVIEW_MEMOPENTINGPPC
+        // Stage 1: Fetch main data
+        callback.onProgress("fetch", 0, 0, "Mengambil data utama...", "Query ke ITXVIEW_MEMOPENTINGPPC");
         List<Map<String, Object>> mainDataList = repository.getMainData(request);
 
+        int totalRecords = mainDataList.size();
+        callback.onProgress("fetch", totalRecords, totalRecords,
+                "Data utama ditemukan", totalRecords + " record akan diproses");
+
+        if (totalRecords == 0) {
+            callback.onProgress("complete", 0, 0, "Tidak ada data", "Tidak ada data yang sesuai filter");
+            return results;
+        }
+
+        // Stage 2: Process each row
+        int processedCount = 0;
+        int lastReportedPercent = 0;
+
         for (Map<String, Object> rowdb2 : mainDataList) {
+            processedCount++;
+
+            // Report progress every 5% or every 10 records (whichever is more frequent)
+            int currentPercent = (processedCount * 100) / totalRecords;
+            if (currentPercent >= lastReportedPercent + 5 || processedCount % 10 == 0 || processedCount == totalRecords) {
+                callback.onProgress("process", processedCount, totalRecords,
+                        "Memproses data " + processedCount + " dari " + totalRecords,
+                        "NO_KK: " + getStringValue(rowdb2, "NO_KK"));
+                lastReportedPercent = currentPercent;
+            }
+
             String noKk = getStringValue(rowdb2, "NO_KK");
             String demand = getStringValue(rowdb2, "DEMAND");
             String noOrder = getStringValue(rowdb2, "NO_ORDER");
@@ -68,13 +104,13 @@ public class PpcFilterService {
                         groupstepnumber = "0";
                     }
 
-                    // For DELAY PROGRESS STATUS (MS. AMY Request)
-                    if ("2".equals(statusCloseProgressStatus)) { // ENTERED
+                    // For DELAY PROGRESS STATUS
+                    if ("2".equals(statusCloseProgressStatus)) {
                         Map<String, Object> delayProgressSelesai = repository.getDelayProgressSelesai(noKk);
                         jamStatusTerakhir = getStringValue(delayProgressSelesai, "MULAI");
                         Object delayPs = delayProgressSelesai.get("DELAY_PROGRESSSTATUS");
                         delayProgressStatus = (delayPs != null ? delayPs.toString() : "") + " Hari";
-                    } else if ("3".equals(statusCloseProgressStatus)) { // PROGRESS
+                    } else if ("3".equals(statusCloseProgressStatus)) {
                         Map<String, Object> delayProgressMulai = repository.getDelayProgressMulai(noKk);
                         jamStatusTerakhir = getStringValue(delayProgressMulai, "SELESAI");
                         Object delayPs = delayProgressMulai.get("DELAY_PROGRESSSTATUS");
@@ -86,7 +122,7 @@ public class PpcFilterService {
                     Integer cnpProgressStatus = getIntValue(cnpClose, "PROGRESSSTATUS");
                     String cnpOperationCode = getStringValue(cnpClose, "OPERATIONCODE");
 
-                    if (cnpProgressStatus != null && cnpProgressStatus == 3) { // 3 is Closed
+                    if (cnpProgressStatus != null && cnpProgressStatus == 3) {
                         if ("PPC4".equals(cnpOperationCode)) {
                             if ("6".equals(progressStatus)) {
                                 kodeDept = "-";
@@ -101,7 +137,6 @@ public class PpcFilterService {
                             if ("2".equals(statusCloseProgressStatus)) {
                                 groupstepOption = "= '" + groupstepnumber + "'";
                             } else {
-                                // Check if all steps are closed
                                 Map<String, Object> totalStep = repository.getTotalStep(noKk);
                                 Map<String, Object> totalClose = repository.getTotalClose(noKk);
 
@@ -115,14 +150,12 @@ public class PpcFilterService {
                                 }
                             }
 
-                            // Get not CNP close (next step)
                             Map<String, Object> notCnpClose = repository.getNotCnpClose(noKk, groupstepOption);
                             if (!notCnpClose.isEmpty()) {
                                 kodeDept = getStringValue(notCnpClose, "OPERATIONGROUPCODE");
                                 statusTerakhir = getStringValue(notCnpClose, "LONGDESCRIPTION");
                                 statusOperation = getStringValue(notCnpClose, "STATUS_OPERATION");
                             } else {
-                                // Retry with = groupstepnumber
                                 groupstepOption = "= '" + groupstepnumber + "'";
                                 notCnpClose = repository.getNotCnpClose(noKk, groupstepOption);
                                 kodeDept = getStringValue(notCnpClose, "OPERATIONGROUPCODE");
@@ -145,7 +178,7 @@ public class PpcFilterService {
                 }
             }
 
-            // Check BKR1 status (Tiket no: BDIT250000492, BDIT250001161)
+            // Check BKR1 status
             Map<String, Object> statusTerakhirBKR1 = repository.getStatusTerakhirBKR1(noKk, demand);
             String stepNumberBKR1 = getStringValue(statusTerakhirBKR1, "STEPNUMBER");
 
@@ -357,7 +390,6 @@ public class PpcFilterService {
                     totalHari = "";
                 }
             } else {
-                // Use ORDERDATE if no bagi kain date
                 Object orderDateObj = rowdb2.get("ORDERDATE");
                 if (orderDateObj != null) {
                     try {
@@ -469,6 +501,10 @@ public class PpcFilterService {
 
             results.add(response);
         }
+
+        // Stage 3: Finalize
+        callback.onProgress("finalize", results.size(), results.size(),
+                "Menyiapkan hasil...", "Memformat " + results.size() + " data");
 
         return results;
     }

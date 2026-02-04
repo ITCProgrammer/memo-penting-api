@@ -128,4 +128,7 @@ public class MemoPentingResponse {
 
     @JsonProperty("RE_PROSES_ADDITIONAL")
     private String reProsesAdditional;               // RE PROSES ADDITIONAL
+
+    @JsonProperty("JAM")                             // JAM (IN-OUT)
+    private String jam;
 }

@@ -56,7 +56,7 @@ public class PpcFilterRepository {
         if (request.getOrderline() != null && !request.getOrderline().isEmpty()) {
             conditions.add("ORDERLINE = '" + request.getOrderline() + "'");
         }
-        if (request.getTgl1() != null && !request.getTgl1().isEmpty() 
+        if (request.getTgl1() != null && !request.getTgl1().isEmpty()
                 && request.getTgl2() != null && !request.getTgl2().isEmpty()) {
             conditions.add("DELIVERY BETWEEN '" + request.getTgl1() + "' AND '" + request.getTgl2() + "'");
         }
@@ -67,23 +67,23 @@ public class PpcFilterRepository {
                 && request.getArticleCode() != null && !request.getArticleCode().isEmpty()) {
             conditions.add("SUBCODE02 = '" + request.getArticleGroup() + "' AND SUBCODE03 = '" + request.getArticleCode() + "'");
         }
-        
+
         // KK OKE filter - PHP: if ($kkoke === 'tidak')
         if ("tidak".equals(request.getKkoke())) {
             conditions2.add("NOT PROGRESSSTATUS = '6' AND NOT PROGRESSSTATUS_DEMAND = '6'");
         }
 
         String conditionsString = conditions.isEmpty() ? "1=1" : String.join(" AND ", conditions);
-        
+
         StringBuilder query = new StringBuilder();
         query.append("SELECT * FROM (SELECT * FROM ITXVIEW_MEMOPENTINGPPC WHERE ").append(conditionsString).append(")");
-        
+
         if (!conditions2.isEmpty()) {
             query.append(" WHERE ").append(String.join(" AND ", conditions2));
         }
 
         log.debug("Main Query (DB2): {}", query.toString());
-        
+
         return db2JdbcTemplate.queryForList(query.toString());
     }
 
@@ -165,13 +165,14 @@ public class PpcFilterRepository {
      * Get Benang Rajut from ITXVIEW_RAJUT (DB2)
      * PHP: $sql_benang_rajut = db2_exec($conn1, "SELECT * FROM ITXVIEW_RAJUT WHERE (ITEMTYPEAFICODE ='KGF' OR ITEMTYPEAFICODE ='FKG') ...")
      */
-    public Map<String, Object> getBenangRajut(String subcode01, String subcode02, String subcode03, 
-                                               String subcode04, String noOrder) {
-        String query = "SELECT * FROM ITXVIEW_RAJUT WHERE (ITEMTYPEAFICODE ='KGF' OR ITEMTYPEAFICODE ='FKG') " +
+    public Map<String, Object> getBenangRajut(String subcode01, String subcode02, String subcode03,
+                                              String subcode04, String noOrder) {
+        String query = "SELECT LISTAGG(TRIM(CODE), ', ') AS CODE FROM ITXVIEW_RAJUT WHERE (ITEMTYPEAFICODE ='KGF' OR ITEMTYPEAFICODE ='FKG') " +
                 "AND TRIM(SUBCODE01) = ? AND TRIM(SUBCODE02) = ? AND TRIM(SUBCODE03) = ? " +
-                "AND TRIM(SUBCODE04) = ? AND TRIM(ORIGDLVSALORDLINESALORDERCODE) = ?";
+                "AND TRIM(SUBCODE04) = ? AND TRIM(ORIGDLVSALORDLINESALORDERCODE) = ? FETCH FIRST 1 ROW ONLY";
         try {
-            return db2JdbcTemplate.queryForMap(query, subcode01, subcode02, subcode03, subcode04, noOrder);
+            List<Map<String, Object>> list = db2JdbcTemplate.queryForList(query, subcode01, subcode02, subcode03, subcode04, noOrder);
+            return list.isEmpty() ? new HashMap<>() : list.get(0);
         } catch (Exception e) {
             return new HashMap<>();
         }
@@ -697,6 +698,35 @@ public class PpcFilterRepository {
                 "WHERE p.PRODUCTIONORDERCODE = ? " +
                 "AND p.PRODUCTIONDEMANDCODE = ? " +
                 "AND (p.STEPTYPE = 1)";
+        try {
+            return db2JdbcTemplate.queryForMap(query, productionOrderCode, demandCode);
+        } catch (Exception e) {
+            return new HashMap<>();
+        }
+    }
+
+    /**
+     * Get JAM (IN - OUT) from PRODUCTIONDEMANDSTEP with JOIN to ITXVIEW_POSISIKK_TGL_IN_PRODORDER and ITXVIEW_POSISIKK_TGL_OUT_PRODORDER (DB2)
+     * PHP: $q_jam = db2_exec($conn1, "SELECT iptip.MULAI, iptop.SELESAI FROM PRODUCTIONDEMANDSTEP p
+     *                                  LEFT JOIN OPERATION o ON o.CODE = p.OPERATIONCODE
+     *                                  LEFT JOIN ITXVIEW_POSISIKK_TGL_IN_PRODORDER iptip ON iptip.PRODUCTIONORDERCODE = p.PRODUCTIONORDERCODE AND iptip.DEMANDSTEPSTEPNUMBER = p.STEPNUMBER
+     *                                  LEFT JOIN ITXVIEW_POSISIKK_TGL_OUT_PRODORDER iptop ON iptop.PRODUCTIONORDERCODE = p.PRODUCTIONORDERCODE AND iptop.DEMANDSTEPSTEPNUMBER = p.STEPNUMBER
+     *                                  WHERE p.PRODUCTIONORDERCODE = '$rowdb2[NO_KK]' AND p.PRODUCTIONDEMANDCODE = '$rowdb2[DEMAND]' AND p.GROUPSTEPNUMBER $groupstep_option
+     *                                  ORDER BY p.GROUPSTEPNUMBER ASC LIMIT 1");
+     */
+    public Map<String, Object> getJamInOut(String productionOrderCode, String demandCode, String groupstepOption) {
+        String query = "SELECT " +
+                "iptip.MULAI, " +
+                "iptop.SELESAI " +
+                "FROM PRODUCTIONDEMANDSTEP p " +
+                "LEFT JOIN OPERATION o ON o.CODE = p.OPERATIONCODE " +
+                "LEFT JOIN ITXVIEW_POSISIKK_TGL_IN_PRODORDER iptip ON iptip.PRODUCTIONORDERCODE = p.PRODUCTIONORDERCODE AND iptip.DEMANDSTEPSTEPNUMBER = p.STEPNUMBER " +
+                "LEFT JOIN ITXVIEW_POSISIKK_TGL_OUT_PRODORDER iptop ON iptop.PRODUCTIONORDERCODE = p.PRODUCTIONORDERCODE AND iptop.DEMANDSTEPSTEPNUMBER = p.STEPNUMBER " +
+                "WHERE p.PRODUCTIONORDERCODE = ? " +
+                "AND p.PRODUCTIONDEMANDCODE = ? " +
+                "AND p.GROUPSTEPNUMBER " + groupstepOption + " " +
+                "ORDER BY p.GROUPSTEPNUMBER ASC " +
+                "FETCH FIRST 1 ROWS ONLY";
         try {
             return db2JdbcTemplate.queryForMap(query, productionOrderCode, demandCode);
         } catch (Exception e) {
