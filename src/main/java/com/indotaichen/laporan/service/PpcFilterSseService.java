@@ -42,6 +42,7 @@ public class PpcFilterSseService {
         // Stage 1: Fetch main data
         callback.onProgress("fetch", 0, 0, "Mengambil data utama...", "Query ke ITXVIEW_MEMOPENTINGPPC");
         List<Map<String, Object>> mainDataList = repository.getMainData(request);
+        MemoPentingLookupCache lookupCache = new MemoPentingLookupCache(repository);
 
         int totalRecords = mainDataList.size();
         callback.onProgress("fetch", totalRecords, totalRecords,
@@ -96,7 +97,7 @@ public class PpcFilterSseService {
                     statusOperation = "KK Oke";
                 } else {
                     // Get status close
-                    Map<String, Object> rowStatusClose = repository.getStatusClose(noKk);
+                    Map<String, Object> rowStatusClose = lookupCache.getStatusClose(noKk);
                     String statusCloseProgressStatus = getStringValue(rowStatusClose, "PROGRESSSTATUS");
                     String groupstepnumber = getStringValue(rowStatusClose, "GROUPSTEPNUMBER");
 
@@ -106,19 +107,19 @@ public class PpcFilterSseService {
 
                     // For DELAY PROGRESS STATUS
                     if ("2".equals(statusCloseProgressStatus)) {
-                        Map<String, Object> delayProgressSelesai = repository.getDelayProgressSelesai(noKk);
+                        Map<String, Object> delayProgressSelesai = lookupCache.getDelayProgressSelesai(noKk);
                         jamStatusTerakhir = getStringValue(delayProgressSelesai, "MULAI");
                         Object delayPs = delayProgressSelesai.get("DELAY_PROGRESSSTATUS");
                         delayProgressStatus = (delayPs != null ? delayPs.toString() : "") + " Hari";
                     } else if ("3".equals(statusCloseProgressStatus)) {
-                        Map<String, Object> delayProgressMulai = repository.getDelayProgressMulai(noKk);
+                        Map<String, Object> delayProgressMulai = lookupCache.getDelayProgressMulai(noKk);
                         jamStatusTerakhir = getStringValue(delayProgressMulai, "SELESAI");
                         Object delayPs = delayProgressMulai.get("DELAY_PROGRESSSTATUS");
                         delayProgressStatus = (delayPs != null ? delayPs.toString() : "") + " Hari";
                     }
 
                     // Get CNP Close
-                    Map<String, Object> cnpClose = repository.getCnpClose(noKk);
+                    Map<String, Object> cnpClose = lookupCache.getCnpClose(noKk);
                     Integer cnpProgressStatus = getIntValue(cnpClose, "PROGRESSSTATUS");
                     String cnpOperationCode = getStringValue(cnpClose, "OPERATIONCODE");
 
@@ -137,8 +138,8 @@ public class PpcFilterSseService {
                             if ("2".equals(statusCloseProgressStatus)) {
                                 groupstepOption = "= '" + groupstepnumber + "'";
                             } else {
-                                Map<String, Object> totalStep = repository.getTotalStep(noKk);
-                                Map<String, Object> totalClose = repository.getTotalClose(noKk);
+                                Map<String, Object> totalStep = lookupCache.getTotalStep(noKk);
+                                Map<String, Object> totalClose = lookupCache.getTotalClose(noKk);
 
                                 Object ts = totalStep.get("TOTALSTEP");
                                 Object tc = totalClose.get("TOTALCLOSE");
@@ -150,14 +151,14 @@ public class PpcFilterSseService {
                                 }
                             }
 
-                            Map<String, Object> notCnpClose = repository.getNotCnpClose(noKk, groupstepOption);
+                            Map<String, Object> notCnpClose = lookupCache.getNotCnpClose(noKk, groupstepOption);
                             if (!notCnpClose.isEmpty()) {
                                 kodeDept = getStringValue(notCnpClose, "OPERATIONGROUPCODE");
                                 statusTerakhir = getStringValue(notCnpClose, "LONGDESCRIPTION");
                                 statusOperation = getStringValue(notCnpClose, "STATUS_OPERATION");
                             } else {
                                 groupstepOption = "= '" + groupstepnumber + "'";
-                                notCnpClose = repository.getNotCnpClose(noKk, groupstepOption);
+                                notCnpClose = lookupCache.getNotCnpClose(noKk, groupstepOption);
                                 kodeDept = getStringValue(notCnpClose, "OPERATIONGROUPCODE");
                                 statusTerakhir = getStringValue(notCnpClose, "LONGDESCRIPTION");
                                 statusOperation = getStringValue(notCnpClose, "STATUS_OPERATION");
@@ -170,7 +171,7 @@ public class PpcFilterSseService {
                             groupstepOption = "> '" + groupstepnumber + "'";
                         }
 
-                        Map<String, Object> statusTerakhirData = repository.getStatusTerakhir(noKk, groupstepOption);
+                        Map<String, Object> statusTerakhirData = lookupCache.getStatusTerakhir(noKk, groupstepOption);
                         kodeDept = getStringValue(statusTerakhirData, "OPERATIONGROUPCODE");
                         statusTerakhir = getStringValue(statusTerakhirData, "LONGDESCRIPTION");
                         statusOperation = getStringValue(statusTerakhirData, "STATUS_OPERATION");
@@ -179,12 +180,12 @@ public class PpcFilterSseService {
             }
 
             // Check BKR1 status
-            Map<String, Object> statusTerakhirBKR1 = repository.getStatusTerakhirBKR1(noKk, demand);
+            Map<String, Object> statusTerakhirBKR1 = lookupCache.getStatusTerakhirBKR1(noKk, demand);
             String stepNumberBKR1 = getStringValue(statusTerakhirBKR1, "STEPNUMBER");
 
             boolean shouldInclude = true;
             if (!statusTerakhirBKR1.isEmpty() && stepNumberBKR1 != null && !stepNumberBKR1.isEmpty()) {
-                Map<String, Object> statusTerakhirClosed = repository.getStatusTerakhirClosed(noKk, demand, stepNumberBKR1);
+                Map<String, Object> statusTerakhirClosed = lookupCache.getStatusTerakhirClosed(noKk, demand, stepNumberBKR1);
                 if (statusTerakhirClosed.isEmpty()) {
                     shouldInclude = false;
                 }
@@ -195,7 +196,7 @@ public class PpcFilterSseService {
             }
 
             // Get LEBAR
-            Map<String, Object> lebarData = repository.getLebar(noOrder, orderLine);
+            Map<String, Object> lebarData = lookupCache.getLebar(noOrder, orderLine);
             String lebar = "";
             Object lebarVal = lebarData.get("LEBAR");
             if (lebarVal != null) {
@@ -203,7 +204,7 @@ public class PpcFilterSseService {
             }
 
             // Get GRAMASI
-            Map<String, Object> gramasiData = repository.getGramasi(noOrder, orderLine);
+            Map<String, Object> gramasiData = lookupCache.getGramasi(noOrder, orderLine);
             String gramasi = "-";
             Object gramasiKff = gramasiData.get("GRAMASI_KFF");
             Object gramasiFkf = gramasiData.get("GRAMASI_FKF");
@@ -214,21 +215,21 @@ public class PpcFilterSseService {
             }
 
             // Get Actual Delivery
-            String actualDelivery = repository.getActualDelivery(noOrder, orderLine);
+            String actualDelivery = lookupCache.getActualDelivery(noOrder, orderLine);
 
             // Get QTY Salinan
-            Map<String, Object> qtySalinanData = repository.getQtySalinan(demand);
+            Map<String, Object> qtySalinanData = lookupCache.getQtySalinan(demand);
             String subcode01 = getStringValue(qtySalinanData, "SUBCODE01");
             String subcode02 = getStringValue(qtySalinanData, "SUBCODE02");
             String subcode03 = getStringValue(qtySalinanData, "SUBCODE03");
             String subcode04 = getStringValue(qtySalinanData, "SUBCODE04");
 
             // Get Benang Booking New
-            Map<String, Object> benangBookingNew = repository.getBenangBookingNew(noOrder, orderLine);
+            Map<String, Object> benangBookingNew = lookupCache.getBenangBookingNew(noOrder, orderLine);
             String dBenangBookingNew = getStringValue(benangBookingNew, "SALESORDERCODE");
 
             // Get Benang Rajut
-            Map<String, Object> benangRajut = repository.getBenangRajut(
+            Map<String, Object> benangRajut = lookupCache.getBenangRajut(
                     subcode01 != null ? subcode01.trim() : "",
                     subcode02 != null ? subcode02.trim() : "",
                     subcode03 != null ? subcode03.trim() : "",
@@ -238,8 +239,8 @@ public class PpcFilterSseService {
             String tglPoGreige = getStringValue(benangRajut, "TGLPOGREIGE");
 
             // Get Tanggal Greige
-            Map<String, Object> tglGreige = repository.getTglGreige(dBenangRajut != null ? dBenangRajut : "");
-            Map<String, Object> tglAwalGreigeRmp = repository.getTglAwalGreigeRmp(demand);
+            Map<String, Object> tglGreige = lookupCache.getTglGreige(dBenangRajut != null ? dBenangRajut : "");
+            Map<String, Object> tglAwalGreigeRmp = lookupCache.getTglAwalGreigeRmp(demand);
 
             String greigeAwal = "";
             String greigeAkhir = "";
@@ -261,19 +262,19 @@ public class PpcFilterSseService {
             }
 
             // Get Tanggal Bagi Kain
-            Map<String, Object> tglBagiKain = repository.getTglBagiKain(noKk);
+            Map<String, Object> tglBagiKain = lookupCache.getTglBagiKain(noKk);
             String bagiKainTgl = getStringValue(tglBagiKain, "TRANSACTIONDATE");
 
             // Get Roll
-            Map<String, Object> rollData = repository.getRoll(noKk);
+            Map<String, Object> rollData = lookupCache.getRoll(noKk);
             String roll = getStringValue(rollData, "ROLL");
 
             // Get Original PD Code
-            Map<String, Object> origPdCode = repository.getOriginalPdCode(demand);
+            Map<String, Object> origPdCode = lookupCache.getOriginalPdCode(demand);
             String originalPdCode = getStringValue(origPdCode, "ORIGINALPDCODE");
 
             // Get Cek Salinan
-            Map<String, Object> cekSalinan = repository.getCekSalinan(demand);
+            Map<String, Object> cekSalinan = lookupCache.getCekSalinan(demand);
             String salinan058 = getStringValue(cekSalinan, "SALINAN_058");
 
             // Calculate Bruto/Bagi Kain
@@ -299,7 +300,7 @@ public class PpcFilterSseService {
             }
 
             // Get QTY Packing
-            Map<String, Object> qtyPacking = repository.getQtyPacking(demand);
+            Map<String, Object> qtyPacking = lookupCache.getQtyPacking(demand);
             String qtyPackingStr = "0";
             Object mutasi = qtyPacking.get("mutasi");
             if (mutasi != null) {
@@ -307,7 +308,7 @@ public class PpcFilterSseService {
             }
 
             // Get Netto YD
-            Map<String, Object> nettoYd = repository.getNettoYd(demand);
+            Map<String, Object> nettoYd = lookupCache.getNettoYd(demand);
             String nettoYdMtr = "0";
             String priceUnitOfMeasureCode = getStringValue(nettoYd, "PRICEUNITOFMEASURECODE");
             if (priceUnitOfMeasureCode != null && "m".equals(priceUnitOfMeasureCode.trim())) {
@@ -322,15 +323,15 @@ public class PpcFilterSseService {
             String qtyKurangKg = "0.00";
             String qtyKurangYdMtr = "0.00";
             if (noOrder != null && !noOrder.isEmpty() && orderLine != null && !orderLine.isEmpty()) {
-                Map<String, Object> qtyKurang = repository.getQtyKurang(noOrder, orderLine);
-                Map<String, Object> lotCode = repository.getLotCode(noOrder, orderLine);
+                Map<String, Object> qtyKurang = lookupCache.getQtyKurang(noOrder, orderLine);
+                Map<String, Object> lotCode = lookupCache.getLotCode(noOrder, orderLine);
 
                 String prodOrderCodes = getStringValue(lotCode, "PRODUCTIONORDERCODE");
                 String prodDemandCodes = getStringValue(lotCode, "PRODUCTIONDEMANDCODE");
 
                 Map<String, Object> qtyReady = new HashMap<>();
                 if (prodOrderCodes != null && !prodOrderCodes.isEmpty()) {
-                    qtyReady = repository.getQtyReady(prodOrderCodes, prodDemandCodes, noOrder);
+                    qtyReady = lookupCache.getQtyReady(prodOrderCodes, prodDemandCodes, noOrder);
                 }
 
                 Object konversi = qtyKurang.get("KONVERSI");
@@ -360,11 +361,11 @@ public class PpcFilterSseService {
             String nomesin = "";
             String nourut = "";
             if ("DYE".equals(kodeDept)) {
-                Map<String, Object> scheduleDye = repository.getScheduleDye(noKk);
+                Map<String, Object> scheduleDye = lookupCache.getScheduleDye(noKk);
                 nomesin = getStringValue(scheduleDye, "no_mesin");
                 nourut = getStringValue(scheduleDye, "no_urut");
             } else if ("FIN".equals(kodeDept)) {
-                Map<String, Object> scheduleFin = repository.getScheduleFin(noKk, demand);
+                Map<String, Object> scheduleFin = lookupCache.getScheduleFin(noKk, demand);
                 String noMesinFin = getStringValue(scheduleFin, "no_mesin");
                 if (noMesinFin != null && !noMesinFin.isEmpty()) {
                     String trimmed = noMesinFin.trim();
@@ -405,13 +406,13 @@ public class PpcFilterSseService {
             }
 
             // Get Additional
-            Map<String, Object> additional = repository.getAdditional(noKk, demand);
+            Map<String, Object> additional = lookupCache.getAdditional(noKk, demand);
             String reProsesAdditional = getStringValue(additional, "TOTAL_ADDITIONAL");
 
             // Get JAM (IN - OUT)
             String jam = "";
             if (!groupstepOption.isEmpty()) {
-                Map<String, Object> jamData = repository.getJamInOut(noKk, demand, groupstepOption);
+                Map<String, Object> jamData = lookupCache.getJamInOut(noKk, demand, groupstepOption);
                 String mulai = getStringValue(jamData, "MULAI");
                 String selesai = getStringValue(jamData, "SELESAI");
                 if (mulai != null && !mulai.isEmpty()) {
