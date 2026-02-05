@@ -53,8 +53,8 @@ public class PpcFilterSseController {
             @RequestParam(required = false, defaultValue = "tidak") String kkoke,
             @RequestParam(required = false) String orderline) {
 
-        // SSE timeout: 5 minutes
-        SseEmitter emitter = new SseEmitter(300000L);
+        // SSE timeout: 3 hours
+        SseEmitter emitter = new SseEmitter(10800000L);
 
         PpcFilterRequest request = PpcFilterRequest.builder()
                 .noOrder(noOrder)

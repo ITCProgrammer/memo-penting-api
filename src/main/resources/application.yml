@@ -1,9 +1,15 @@
 server:
   port: 8080
+  tomcat:
+    connection-timeout: 10800000
+    keep-alive-timeout: 10800000
 
 spring:
   application:
     name: laporan-springboot
+  mvc:
+    async:
+      request-timeout: 10800000
 
 # Database Configuration based on koneksi.php
 
@@ -18,6 +24,9 @@ datasource:
     minimum-idle: 2
     maximum-pool-size: 20
     connection-timeout: 18000000
+    idle-timeout: 3600000
+    max-lifetime: 3600000
+    keepalive-time: 300000
 
   # SQL Server - nowprd database (SVR19 - 10.0.0.221)
   # This is con_nowprd in PHP
@@ -29,6 +38,9 @@ datasource:
     minimum-idle: 2
     maximum-pool-size: 20
     connection-timeout: 3600000
+    idle-timeout: 3600000
+    max-lifetime: 3600000
+    keepalive-time: 300000
 
   # MySQL - db_qc database (10.0.0.10)
   # This is con_db_qc in PHP - still using MySQL
@@ -40,6 +52,9 @@ datasource:
     minimum-idle: 2
     maximum-pool-size: 20
     connection-timeout: 3600000
+    idle-timeout: 3600000
+    max-lifetime: 3600000
+    keepalive-time: 300000
 
   # SQL Server - db_dying database (SVR19 - 10.0.0.221)
   # This is con_db_dyeing in PHP
@@ -51,6 +66,9 @@ datasource:
     minimum-idle: 2
     maximum-pool-size: 20
     connection-timeout: 3600000
+    idle-timeout: 3600000
+    max-lifetime: 3600000
+    keepalive-time: 300000
 
   # SQL Server - db_finishing database (SVR19 - 10.0.0.221)
   # This is con_finishing / con_db_finishing in PHP
@@ -62,6 +80,9 @@ datasource:
     minimum-idle: 2
     maximum-pool-size: 20
     connection-timeout: 3600000
+    idle-timeout: 3600000
+    max-lifetime: 3600000
+    keepalive-time: 300000
 
 logging:
   level:
